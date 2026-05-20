@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Story Book Collection</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ink: #1a1008;
+    --parchment: #f7f2e8;
+    --warm-cream: #ede7d4;
+    --gold: #c9973a;
+    --gold-light: #e8c97a;
+    --gold-dark: #8a6420;
+    --rust: #c0522a;
+    --sage: #4a6741;
+    --slate: #3d4f5e;
+    --muted: #7a6e60;
+    --border: rgba(180,150,90,0.25);
+    --shadow: 0 4px 24px rgba(26,16,8,0.10);
+    --radius: 12px;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--parchment);
+    color: var(--ink);
+    min-height: 100vh;
+    background-image:
+      radial-gradient(ellipse at 10% 10%, rgba(201,151,58,0.08) 0%, transparent 50%),
+      radial-gradient(ellipse at 90% 90%, rgba(192,82,42,0.06) 0%, transparent 50%);
+  }
+
+  /* HEADER */
+  header {
+    background: var(--ink);
+    color: var(--parchment);
+    padding: 2rem 2.5rem 1.5rem;
+    position: sticky; top: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    border-bottom: 2px solid var(--gold-dark);
+  }
+  .logo { display: flex; align-items: center; gap: 14px; }
+  .logo-icon {
+    width: 42px; height: 42px;
+    background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+  }
+  .logo h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem; font-weight: 700;
+    letter-spacing: 0.01em;
+    color: var(--gold-light);
+  }
+  .logo p { font-size: 0.75rem; color: rgba(247,242,232,0.55); margin-top: 1px; }
+  .header-stats { display: flex; gap: 2rem; }
+  .hstat { text-align: right; }
+  .hstat-num { font-family: 'Playfair Display', serif; font-size: 1.6rem; color: var(--gold-light); }
+  .hstat-lbl { font-size: 0.7rem; color: rgba(247,242,232,0.5); text-transform: uppercase; letter-spacing: 0.08em; }
+
+  /* MAIN LAYOUT */
+  .app { display: grid; grid-template-columns: 300px 1fr; min-height: calc(100vh - 80px); }
+
+  /* SIDEBAR */
+  aside {
+    background: #fff9f0;
+    border-right: 1px solid var(--border);
+    padding: 1.5rem;
+    display: flex; flex-direction: column; gap: 1.5rem;
+    position: sticky; top: 80px; height: calc(100vh - 80px); overflow-y: auto;
+  }
+
+  .panel-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 0.8rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.12em;
+    color: var(--muted);
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* ADD BOOK FORM */
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+  .form-group label { font-size: 0.75rem; font-weight: 500; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+  .form-group input, .form-group select, .form-group textarea {
+    background: var(--parchment);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 9px 12px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.875rem;
+    color: var(--ink);
+    transition: border-color 0.2s, box-shadow 0.2s;
+    width: 100%;
+  }
+  .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+    outline: none; border-color: var(--gold); box-shadow: 0 0 0 3px rgba(201,151,58,0.15);
+  }
+  .form-group textarea { resize: vertical; min-height: 60px; }
+
+  .star-rating { display: flex; gap: 4px; }
+  .star-btn {
+    background: none; border: none; cursor: pointer; font-size: 20px;
+    color: #ddd; transition: color 0.15s, transform 0.1s;
+    padding: 2px;
+  }
+  .star-btn.active { color: var(--gold); }
+  .star-btn:hover { transform: scale(1.2); }
+
+  .btn-add {
+    width: 100%;
+    background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+    color: #fff;
+    border: none; border-radius: 8px;
+    padding: 11px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.875rem; font-weight: 500;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.1s;
+    letter-spacing: 0.03em;
+  }
+  .btn-add:hover { opacity: 0.9; transform: translateY(-1px); }
+  .btn-add:active { transform: translateY(0); }
+
+  /* CATEGORY CHIPS */
+  .cat-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .cat-chip {
+    padding: 5px 12px; border-radius: 100px;
+    font-size: 0.75rem; font-weight: 500;
+    cursor: pointer; border: 1.5px solid transparent;
+    transition: all 0.15s;
+    display: flex; align-items: center; gap: 5px;
+  }
+  .cat-chip.all { background: var(--ink); color: var(--parchment); border-color: var(--ink); }
+  .cat-chip.active { border-color: currentColor; opacity: 1; }
+  .cat-chip:not(.all):not(.active) { opacity: 0.55; border-color: transparent; background: var(--warm-cream); }
+
+  /* CATEGORY COLORS */
+  [data-cat="Fantasy"]      { background: #eae4f5; color: #5a3f8a; }
+  [data-cat="Mystery"]      { background: #e5eef7; color: #1d4d7a; }
+  [data-cat="Romance"]      { background: #f7e4ea; color: #8a2040; }
+  [data-cat="Adventure"]    { background: #e7f0e3; color: #2d5e28; }
+  [data-cat="Horror"]       { background: #f5e4e4; color: #7a1f1f; }
+  [data-cat="Sci-Fi"]       { background: #e3edf5; color: #1a4060; }
+  [data-cat="Historical"]   { background: #f5ede3; color: #7a4a1a; }
+  [data-cat="Fairy Tale"]   { background: #f5e8d5; color: #7a5020; }
+  [data-cat="Other"]        { background: var(--warm-cream); color: var(--muted); }
+
+  /* STATS PANEL */
+  .stat-bars { display: flex; flex-direction: column; gap: 10px; }
+  .stat-bar-row { display: flex; flex-direction: column; gap: 4px; }
+  .stat-bar-meta { display: flex; justify-content: space-between; font-size: 0.75rem; }
+  .stat-bar-name { color: var(--ink); font-weight: 500; }
+  .stat-bar-count { color: var(--muted); }
+  .stat-track { background: var(--warm-cream); border-radius: 100px; height: 6px; overflow: hidden; }
+  .stat-fill { height: 100%; border-radius: 100px; transition: width 0.5s cubic-bezier(0.34,1.56,0.64,1); }
+
+  /* MAIN CONTENT */
+  main { padding: 1.5rem 2rem; display: flex; flex-direction: column; gap: 1.5rem; }
+
+  /* TOOLBAR */
+  .toolbar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .search-wrap { position: relative; flex: 1; min-width: 200px; }
+  .search-wrap svg { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--muted); pointer-events: none; }
+  .search-input {
+    width: 100%;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 9px 12px 9px 38px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.875rem; color: var(--ink);
+  }
+  .search-input:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 0 3px rgba(201,151,58,0.12); }
+  .sort-select {
+    background: #fff; border: 1px solid var(--border);
+    border-radius: 8px; padding: 9px 12px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.875rem; color: var(--ink); cursor: pointer;
+  }
+  .view-toggle { display: flex; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .view-btn {
+    background: none; border: none; cursor: pointer;
+    padding: 9px 12px; color: var(--muted);
+    transition: background 0.15s, color 0.15s;
+  }
+  .view-btn.active { background: var(--ink); color: var(--parchment); }
+
+  /* SUMMARY CARDS */
+  .summary-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  .scard {
+    background: #fff; border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 1rem 1.2rem;
+    display: flex; flex-direction: column; gap: 4px;
+  }
+  .scard-icon { font-size: 1.4rem; margin-bottom: 4px; }
+  .scard-val { font-family: 'Playfair Display', serif; font-size: 1.8rem; color: var(--ink); }
+  .scard-lbl { font-size: 0.72rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.07em; }
+
+  /* BOOK GRID */
+  .books-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; }
+  .books-list { display: flex; flex-direction: column; gap: 8px; }
+
+  /* BOOK CARD */
+  .book-card {
+    background: #fff; border: 1px solid var(--border);
+    border-radius: var(--radius); overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+    cursor: default; position: relative;
+  }
+  .book-card:hover { transform: translateY(-4px); box-shadow: var(--shadow); }
+  .book-spine { height: 6px; }
+  .book-body { padding: 1rem; }
+  .book-cat-badge {
+    display: inline-block; padding: 3px 10px;
+    border-radius: 100px; font-size: 0.68rem; font-weight: 500;
+    margin-bottom: 8px;
+  }
+  .book-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem; font-weight: 700; line-height: 1.3;
+    margin-bottom: 4px; color: var(--ink);
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  }
+  .book-author { font-size: 0.78rem; color: var(--muted); margin-bottom: 10px; font-style: italic; }
+  .book-stars { font-size: 13px; margin-bottom: 8px; }
+  .book-notes { font-size: 0.75rem; color: var(--muted); line-height: 1.5;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .book-footer {
+    padding: 8px 1rem; border-top: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .book-date { font-size: 0.7rem; color: var(--muted); }
+  .btn-delete {
+    background: none; border: none; cursor: pointer;
+    color: #ccc; font-size: 16px; padding: 2px;
+    transition: color 0.15s;
+  }
+  .btn-delete:hover { color: var(--rust); }
+
+  /* LIST VIEW */
+  .book-list-row {
+    background: #fff; border: 1px solid var(--border);
+    border-radius: 10px; padding: 12px 1rem;
+    display: grid; grid-template-columns: 8px 1fr auto auto auto;
+    align-items: center; gap: 12px;
+    transition: box-shadow 0.15s;
+  }
+  .book-list-row:hover { box-shadow: var(--shadow); }
+  .row-spine { width: 8px; height: 44px; border-radius: 4px; }
+  .row-info .book-title { font-size: 0.9rem; margin-bottom: 2px; }
+  .row-info .book-author { margin-bottom: 0; }
+  .row-cat { font-size: 0.72rem; font-weight: 500; padding: 3px 10px; border-radius: 100px; }
+  .row-stars { font-size: 12px; }
+
+  /* EMPTY STATE */
+  .empty {
+    text-align: center; padding: 4rem 2rem;
+    color: var(--muted);
+  }
+  .empty-icon { font-size: 3rem; margin-bottom: 1rem; }
+  .empty h3 { font-family: 'Playfair Display', serif; font-size: 1.2rem; margin-bottom: 0.5rem; color: var(--ink); }
+  .empty p { font-size: 0.875rem; }
+
+  /* TOAST */
+  .toast {
+    position: fixed; bottom: 2rem; right: 2rem;
+    background: var(--ink); color: var(--gold-light);
+    border-radius: 10px; padding: 12px 20px;
+    font-size: 0.875rem; font-weight: 500;
+    box-shadow: 0 8px 32px rgba(26,16,8,0.25);
+    transform: translateY(100px); opacity: 0;
+    transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1);
+    z-index: 9999;
+  }
+  .toast.show { transform: translateY(0); opacity: 1; }
+
+  /* MODAL */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(26,16,8,0.5);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 1000; padding: 1rem;
+    opacity: 0; pointer-events: none; transition: opacity 0.2s;
+  }
+  .modal-overlay.open { opacity: 1; pointer-events: all; }
+  .modal {
+    background: #fff9f0; border-radius: var(--radius);
+    padding: 2rem; max-width: 480px; width: 100%;
+    border: 1px solid var(--border);
+    transform: scale(0.95); transition: transform 0.2s;
+  }
+  .modal-overlay.open .modal { transform: scale(1); }
+  .modal h2 { font-family: 'Playfair Display', serif; font-size: 1.2rem; margin-bottom: 1.2rem; }
+  .modal-actions { display: flex; gap: 10px; margin-top: 1.5rem; justify-content: flex-end; }
+  .btn-cancel { background: var(--warm-cream); border: none; border-radius: 8px; padding: 9px 18px; cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 0.875rem; }
+  .btn-confirm { background: var(--rust); color: #fff; border: none; border-radius: 8px; padding: 9px 18px; cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 0.875rem; }
+
+  @media (max-width: 900px) {
+    .app { grid-template-columns: 1fr; }
+    aside { position: static; height: auto; }
+    .summary-grid { grid-template-columns: repeat(2, 1fr); }
+    header { flex-direction: column; gap: 1rem; text-align: center; }
+    .header-stats { justify-content: center; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon">📚</div>
+    <div>
+      <h1>My Story Library</h1>
+      <p>Personal book collection tracker</p>
+    </div>
+  </div>
+  <div class="header-stats">
+    <div class="hstat">
+      <div class="hstat-num" id="hTotal">0</div>
+      <div class="hstat-lbl">Books</div>
+    </div>
+    <div class="hstat">
+      <div class="hstat-num" id="hCats">0</div>
+      <div class="hstat-lbl">Categories</div>
+    </div>
+    <div class="hstat">
+      <div class="hstat-num" id="hAvgRating">—</div>
+      <div class="hstat-lbl">Avg Rating</div>
+    </div>
+  </div>
+</header>
+
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <aside>
+    <div>
+      <div class="panel-title">Add New Book</div>
+      <div style="display:flex;flex-direction:column;gap:10px;margin-top:12px;">
+        <div class="form-group">
+          <label>Title *</label>
+          <input id="fTitle" type="text" placeholder="Book title...">
+        </div>
+        <div class="form-group">
+          <label>Author</label>
+          <input id="fAuthor" type="text" placeholder="Author name...">
+        </div>
+        <div class="form-group">
+          <label>Category *</label>
+          <select id="fCat">
+            <option value="">— Select category —</option>
+            <option>Fantasy</option>
+            <option>Mystery</option>
+            <option>Romance</option>
+            <option>Adventure</option>
+            <option>Horror</option>
+            <option>Sci-Fi</option>
+            <option>Historical</option>
+            <option>Fairy Tale</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Your Rating</label>
+          <div class="star-rating" id="starRating">
+            <button class="star-btn" data-v="1">★</button>
+            <button class="star-btn" data-v="2">★</button>
+            <button class="star-btn" data-v="3">★</button>
+            <button class="star-btn" data-v="4">★</button>
+            <button class="star-btn" data-v="5">★</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Notes</label>
+          <textarea id="fNotes" placeholder="Your thoughts..."></textarea>
+        </div>
+        <button class="btn-add" onclick="addBook()">+ Add to Library</button>
+      </div>
+    </div>
+
+    <div>
+      <div class="panel-title">Filter by Category</div>
+      <div class="cat-chips" id="catChips" style="margin-top:10px;">
+        <span class="cat-chip all active" onclick="filterCat('')">All</span>
+      </div>
+    </div>
+
+    <div>
+      <div class="panel-title">Collection Breakdown</div>
+      <div class="stat-bars" id="statBars" style="margin-top:10px;"></div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main>
+    <!-- SUMMARY -->
+    <div class="summary-grid">
+      <div class="scard"><div class="scard-icon">📖</div><div class="scard-val" id="sTotal">0</div><div class="scard-lbl">Total Books</div></div>
+      <div class="scard"><div class="scard-icon">🏷️</div><div class="scard-val" id="sCats">0</div><div class="scard-lbl">Categories</div></div>
+      <div class="scard"><div class="scard-icon">⭐</div><div class="scard-val" id="sAvg">—</div><div class="scard-lbl">Avg Rating</div></div>
+      <div class="scard"><div class="scard-icon">🏆</div><div class="scard-val" id="sTop">—</div><div class="scard-lbl">Top Category</div></div>
+    </div>
+
+    <!-- TOOLBAR -->
+    <div class="toolbar">
+      <div class="search-wrap">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input class="search-input" id="searchInput" placeholder="Search books or authors..." oninput="render()">
+      </div>
+      <select class="sort-select" id="sortSelect" onchange="render()">
+        <option value="newest">Newest first</option>
+        <option value="oldest">Oldest first</option>
+        <option value="title">A → Z</option>
+        <option value="rating">Top rated</option>
+      </select>
+      <div class="view-toggle">
+        <button class="view-btn active" id="vGrid" onclick="setView('grid')" title="Grid view">⊞</button>
+        <button class="view-btn" id="vList" onclick="setView('list')" title="List view">≡</button>
+      </div>
+    </div>
+
+    <!-- BOOKS CONTAINER -->
+    <div id="booksContainer"></div>
+  </main>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- DELETE MODAL -->
+<div class="modal-overlay" id="deleteModal">
+  <div class="modal">
+    <h2>Remove this book?</h2>
+    <p style="color:var(--muted);font-size:0.875rem;">This will permanently remove the book from your collection.</p>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-confirm" onclick="confirmDelete()">Remove</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const CAT_COLORS = {
+  Fantasy:    { bg:'#eae4f5', text:'#5a3f8a', spine:'#8b6bc7' },
+  Mystery:    { bg:'#e5eef7', text:'#1d4d7a', spine:'#4a88c7' },
+  Romance:    { bg:'#f7e4ea', text:'#8a2040', spine:'#c7607a' },
+  Adventure:  { bg:'#e7f0e3', text:'#2d5e28', spine:'#5da850' },
+  Horror:     { bg:'#f5e4e4', text:'#7a1f1f', spine:'#c75050' },
+  'Sci-Fi':   { bg:'#e3edf5', text:'#1a4060', spine:'#4080b0' },
+  Historical: { bg:'#f5ede3', text:'#7a4a1a', spine:'#c0873a' },
+  'Fairy Tale':{ bg:'#f5e8d5', text:'#7a5020', spine:'#d4a050' },
+  Other:      { bg:'#f0ede8', text:'#7a6e60', spine:'#a09880' },
+};
+
+let books = JSON.parse(localStorage.getItem('myStoryBooks') || '[]');
+let currentFilter = '';
+let currentView = 'grid';
+let rating = 0;
+let pendingDeleteId = null;
+
+function save() { localStorage.setItem('myStoryBooks', JSON.stringify(books)); }
+
+function stars(n) {
+  return Array.from({length:5}, (_,i) => `<span style="color:${i<n?'#c9973a':'#ddd'}">${i<n?'★':'☆'}</span>`).join('');
+}
+
+function fmtDate(d) {
+  return new Date(d).toLocaleDateString('en-IN', {day:'numeric',month:'short',year:'numeric'});
+}
+
+// Star rating UI
+document.querySelectorAll('.star-btn').forEach(btn => {
+  btn.addEventListener('mouseover', () => highlightStars(+btn.dataset.v));
+  btn.addEventListener('mouseout', () => highlightStars(rating));
+  btn.addEventListener('click', () => { rating = +btn.dataset.v; highlightStars(rating); });
+});
+function highlightStars(n) {
+  document.querySelectorAll('.star-btn').forEach(b => b.classList.toggle('active', +b.dataset.v <= n));
+}
+
+function addBook() {
+  const title = document.getElementById('fTitle').value.trim();
+  const cat   = document.getElementById('fCat').value;
+  if (!title) { showToast('Please enter a book title'); return; }
+  if (!cat)   { showToast('Please select a category'); return; }
+
+  books.unshift({
+    id: Date.now(),
+    title,
+    author: document.getElementById('fAuthor').value.trim() || 'Unknown',
+    category: cat,
+    rating,
+    notes: document.getElementById('fNotes').value.trim(),
+    added: Date.now()
+  });
+  save(); render();
+
+  document.getElementById('fTitle').value = '';
+  document.getElementById('fAuthor').value = '';
+  document.getElementById('fCat').value = '';
+  document.getElementById('fNotes').value = '';
+  rating = 0; highlightStars(0);
+  showToast('📚 Book added to your library!');
+}
+
+function filterCat(cat) {
+  currentFilter = cat;
+  document.querySelectorAll('.cat-chip').forEach(c => {
+    c.classList.remove('active');
+    if ((cat === '' && c.classList.contains('all')) ||
+        (c.dataset.cat === cat)) c.classList.add('active');
+  });
+  render();
+}
+
+function setView(v) {
+  currentView = v;
+  document.getElementById('vGrid').classList.toggle('active', v==='grid');
+  document.getElementById('vList').classList.toggle('active', v==='list');
+  render();
+}
+
+function openDeleteModal(id) {
+  pendingDeleteId = id;
+  document.getElementById('deleteModal').classList.add('open');
+}
+function closeModal() {
+  pendingDeleteId = null;
+  document.getElementById('deleteModal').classList.remove('open');
+}
+function confirmDelete() {
+  books = books.filter(b => b.id !== pendingDeleteId);
+  save(); render();
+  closeModal();
+  showToast('Book removed from library');
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+function render() {
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  const sort = document.getElementById('sortSelect').value;
+
+  // Filter
+  let filtered = books.filter(b => {
+    const matchCat = !currentFilter || b.category === currentFilter;
+    const matchQ = !q || b.title.toLowerCase().includes(q) || b.author.toLowerCase().includes(q);
+    return matchCat && matchQ;
+  });
+
+  // Sort
+  filtered.sort((a,b) => {
+    if (sort==='newest') return b.added - a.added;
+    if (sort==='oldest') return a.added - b.added;
+    if (sort==='title') return a.title.localeCompare(b.title);
+    if (sort==='rating') return b.rating - a.rating;
+    return 0;
+  });
+
+  // Stats
+  const catCounts = {};
+  books.forEach(b => { catCounts[b.category] = (catCounts[b.category]||0) + 1; });
+  const cats = Object.keys(catCounts);
+  const totalRated = books.filter(b=>b.rating>0);
+  const avgRating = totalRated.length ? (totalRated.reduce((s,b)=>s+b.rating,0)/totalRated.length).toFixed(1) : null;
+  const topCat = cats.sort((a,b)=>catCounts[b]-catCounts[a])[0] || null;
+  const maxCount = Math.max(...Object.values(catCounts), 1);
+
+  // Header
+  document.getElementById('hTotal').textContent = books.length;
+  document.getElementById('hCats').textContent = cats.length;
+  document.getElementById('hAvgRating').textContent = avgRating ? '⭐'+avgRating : '—';
+
+  // Summary cards
+  document.getElementById('sTotal').textContent = books.length;
+  document.getElementById('sCats').textContent = cats.length;
+  document.getElementById('sAvg').textContent = avgRating ? avgRating : '—';
+  document.getElementById('sTop').textContent = topCat || '—';
+
+  // Category chips
+  const chipsCont = document.getElementById('catChips');
+  chipsCont.innerHTML = `<span class="cat-chip all${!currentFilter?' active':''}" onclick="filterCat('')">All <strong>${books.length}</strong></span>`;
+  Object.entries(catCounts).sort((a,b)=>b[1]-a[1]).forEach(([cat, cnt]) => {
+    const c = CAT_COLORS[cat]||CAT_COLORS.Other;
+    chipsCont.innerHTML += `<span class="cat-chip${currentFilter===cat?' active':''}" data-cat="${cat}" style="background:${c.bg};color:${c.text}" onclick="filterCat('${cat}')">${cat} ${cnt}</span>`;
+  });
+
+  // Stat bars
+  const barsCont = document.getElementById('statBars');
+  barsCont.innerHTML = Object.entries(catCounts).sort((a,b)=>b[1]-a[1]).map(([cat,cnt]) => {
+    const c = CAT_COLORS[cat]||CAT_COLORS.Other;
+    const pct = Math.round((cnt/maxCount)*100);
+    return `<div class="stat-bar-row">
+      <div class="stat-bar-meta">
+        <span class="stat-bar-name">${cat}</span>
+        <span class="stat-bar-count">${cnt} book${cnt!==1?'s':''}</span>
+      </div>
+      <div class="stat-track"><div class="stat-fill" style="width:${pct}%;background:${c.spine}"></div></div>
+    </div>`;
+  }).join('') || '<p style="color:var(--muted);font-size:0.8rem;">No books yet.</p>';
+
+  // Books
+  const container = document.getElementById('booksContainer');
+  if (!filtered.length) {
+    container.innerHTML = `<div class="empty"><div class="empty-icon">📭</div><h3>${books.length?'No books match your search':'Your library is empty'}</h3><p>${books.length?'Try different search terms or clear the filter.':'Add your first story book using the form on the left!'}</p></div>`;
+    return;
+  }
+
+  if (currentView === 'grid') {
+    container.innerHTML = `<div class="books-grid">${filtered.map(book => {
+      const c = CAT_COLORS[book.category]||CAT_COLORS.Other;
+      return `<div class="book-card">
+        <div class="book-spine" style="background:${c.spine}"></div>
+        <div class="book-body">
+          <span class="book-cat-badge" style="background:${c.bg};color:${c.text}">${book.category}</span>
+          <div class="book-title">${book.title}</div>
+          <div class="book-author">by ${book.author}</div>
+          ${book.rating ? `<div class="book-stars">${stars(book.rating)}</div>` : ''}
+          ${book.notes ? `<div class="book-notes">${book.notes}</div>` : ''}
+        </div>
+        <div class="book-footer">
+          <span class="book-date">${fmtDate(book.added)}</span>
+          <button class="btn-delete" onclick="openDeleteModal(${book.id})" title="Remove book">✕</button>
+        </div>
+      </div>`;
+    }).join('')}</div>`;
+  } else {
+    container.innerHTML = `<div class="books-list">${filtered.map(book => {
+      const c = CAT_COLORS[book.category]||CAT_COLORS.Other;
+      return `<div class="book-list-row">
+        <div class="row-spine" style="background:${c.spine}"></div>
+        <div class="row-info">
+          <div class="book-title">${book.title}</div>
+          <div class="book-author">by ${book.author}</div>
+        </div>
+        <span class="row-cat" style="background:${c.bg};color:${c.text}">${book.category}</span>
+        <div class="row-stars">${book.rating ? stars(book.rating) : '<span style="color:#ddd">☆☆☆☆☆</span>'}</div>
+        <button class="btn-delete" onclick="openDeleteModal(${book.id})" title="Remove">✕</button>
+      </div>`;
+    }).join('')}</div>`;
+  }
+}
+
+// Seed sample data if empty
+if (!books.length) {
+  books = [
+    { id:1, title:'The Name of the Wind', author:'Patrick Rothfuss', category:'Fantasy', rating:5, notes:'An absolutely captivating story. The magic system is brilliant.', added: Date.now()-86400000*10 },
+    { id:2, title:'And Then There Were None', author:'Agatha Christie', category:'Mystery', rating:5, notes:'The classic whodunit masterpiece!', added: Date.now()-86400000*8 },
+    { id:3, title:'Pride and Prejudice', author:'Jane Austen', category:'Romance', rating:4, notes:'Timeless and witty.', added: Date.now()-86400000*6 },
+    { id:4, title:'Treasure Island', author:'Robert Louis Stevenson', category:'Adventure', rating:4, notes:'Classic adventure on the high seas.', added: Date.now()-86400000*5 },
+    { id:5, title:'The Haunting of Hill House', author:'Shirley Jackson', category:'Horror', rating:4, notes:'Genuinely unsettling atmosphere.', added: Date.now()-86400000*4 },
+    { id:6, title:'Dune', author:'Frank Herbert', category:'Sci-Fi', rating:5, notes:'World-building on an epic scale.', added: Date.now()-86400000*3 },
+    { id:7, title:"The Grimm's Fairy Tales", author:'Brothers Grimm', category:'Fairy Tale', rating:4, notes:'Timeless stories for all ages.', added: Date.now()-86400000*2 },
+    { id:8, title:'The Bronze Horseman', author:'Paullina Simons', category:'Historical', rating:5, notes:'Epic wartime romance — absolutely devastating.', added: Date.now()-86400000*1 },
+  ];
+  save();
+}
+
+render();
+</script>
+</body>
+</html>
