@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My Story Book Collection</title>
+    <link rel="icon" type="image/png" href="book.png">
+    <link rel="stylesheet" href="book.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <script src="book.js" defer></script>
+  <body>
+    <header>
+      <div class="logo">
+        <div class="logo-icon">📚</div>
+        <div>
+          <h1>My Story Library</h1>
+          <p>Personal book collection tracker</p>
+        </div>
+      </div>
+      <div class="header-stats">
+        <div class="hstat">
+          <div class="hstat-num" id="hTotal">0</div>
+          <div class="hstat-lbl">Books</div>
+        </div>
+        <div class="hstat">
+          <div class="hstat-num" id="hCats">0</div>
+          <div class="hstat-lbl">Categories</div>
+        </div>
+        <div class="hstat">
+          <div class="hstat-num" id="hAvgRating">—</div>
+          <div class="hstat-lbl">Avg Rating</div>
+        </div>
+      </div>
+    </header>
+
+    <div class="app">
+      <aside>
+        <div>
+          <div class="panel-title">Add New Book</div>
+          <div
+            style="
+              display: flex;
+              flex-direction: column;
+              gap: 10px;
+              margin-top: 12px;
+            "
+          >
+            <div class="form-group">
+              <label>Title *</label
+              ><input id="fTitle" type="text" placeholder="Book title..." />
+            </div>
+            <div class="form-group">
+              <label>Author</label
+              ><input id="fAuthor" type="text" placeholder="Author name..." />
+            </div>
+            <div class="form-group">
+              <label>Category *</label>
+              <select id="fCat">
+                <option value="">— Select category —</option>
+                <option>Fantasy</option>
+                <option>Mystery</option>
+                <option>Romance</option>
+                <option>Adventure</option>
+                <option>Horror</option>
+                <option>Sci-Fi</option>
+                <option>Historical</option>
+                <option>Fairy Tale</option>
+                <option>Other</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Your Rating</label>
+              <div class="star-rating" id="starRating">
+                <button class="star-btn" data-v="1">★</button>
+                <button class="star-btn" data-v="2">★</button>
+                <button class="star-btn" data-v="3">★</button>
+                <button class="star-btn" data-v="4">★</button>
+                <button class="star-btn" data-v="5">★</button>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Notes</label
+              ><textarea id="fNotes" placeholder="Your thoughts..."></textarea>
+            </div>
+            <button class="btn-add" onclick="addBook()">
+              + Add to Library
+            </button>
+          </div>
+        </div>
+        <div>
+          <div class="panel-title">Filter by Category</div>
+          <div class="cat-chips" id="catChips" style="margin-top: 10px">
+            <span class="cat-chip all active" onclick="filterCat('')">All</span>
+          </div>
+        </div>
+        <div>
+          <div class="panel-title">Collection Breakdown</div>
+          <div class="stat-bars" id="statBars" style="margin-top: 10px"></div>
+        </div>
+      </aside>
+
+      <main>
+        <div class="summary-grid">
+          <div class="scard">
+            <div class="scard-icon">📖</div>
+            <div class="scard-val" id="sTotal">0</div>
+            <div class="scard-lbl">Total Books</div>
+          </div>
+          <div class="scard">
+            <div class="scard-icon">🏷️</div>
+            <div class="scard-val" id="sCats">0</div>
+            <div class="scard-lbl">Categories</div>
+          </div>
+          <div class="scard">
+            <div class="scard-icon">⭐</div>
+            <div class="scard-val" id="sAvg">—</div>
+            <div class="scard-lbl">Avg Rating</div>
+          </div>
+          <div class="scard">
+            <div class="scard-icon">🏆</div>
+            <div class="scard-val" id="sTop">—</div>
+            <div class="scard-lbl">Top Category</div>
+          </div>
+        </div>
+
+        <div class="toolbar">
+          <div class="search-wrap">
+            <svg
+              width="15"
+              height="15"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+            >
+              <circle cx="11" cy="11" r="8" />
+              <path d="m21 21-4.35-4.35" />
+            </svg>
+            <input
+              class="search-input"
+              id="searchInput"
+              placeholder="Search books or authors..."
+              oninput="render()"
+            />
+          </div>
+          <select class="sort-select" id="sortSelect" onchange="render()">
+            <option value="newest">Newest first</option>
+            <option value="oldest">Oldest first</option>
+            <option value="title">A → Z</option>
+            <option value="rating">Top rated</option>
+          </select>
+          <div class="view-toggle">
+            <button
+              class="view-btn active"
+              id="vGrid"
+              onclick="setView('grid')"
+              title="Grid view"
+            >
+              ⊞
+            </button>
+            <button
+              class="view-btn"
+              id="vList"
+              onclick="setView('list')"
+              title="List view"
+            >
+              ≡
+            </button>
+          </div>
+        </div>
+
+        <div id="booksContainer"></div>
+
+        <!-- YET TO BUY SECTION -->
+        <div class="section-divider">
+          <div class="section-divider-line"></div>
+          <div class="section-divider-title">
+            🛒 Yet to Buy
+            <span class="section-divider-badge" id="wishCount">0 books</span>
+          </div>
+          <div class="section-divider-line"></div>
+        </div>
+
+        <div class="wishlist-form">
+          <div
+            style="
+              font-size: 0.78rem;
+              font-weight: 600;
+              color: var(--muted);
+              text-transform: uppercase;
+              letter-spacing: 0.08em;
+              margin-bottom: 2px;
+            "
+          >
+            Add a book to your buy list
+          </div>
+          <div class="wishlist-form-row">
+            <div class="form-group">
+              <label>Title *</label
+              ><input id="wTitle" type="text" placeholder="Book title..." />
+            </div>
+            <div class="form-group">
+              <label>Author</label
+              ><input id="wAuthor" type="text" placeholder="Author..." />
+            </div>
+          </div>
+          <div class="wishlist-form-row">
+            <div class="form-group">
+              <label>Category</label>
+              <select id="wCat">
+                <option value="">— Category —</option>
+                <option>Fantasy</option>
+                <option>Mystery</option>
+                <option>Romance</option>
+                <option>Adventure</option>
+                <option>Horror</option>
+                <option>Sci-Fi</option>
+                <option>Historical</option>
+                <option>Fairy Tale</option>
+                <option>Other</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Priority</label>
+              <select id="wPriority">
+                <option value="high">🔴 High — Must buy soon</option>
+                <option value="med" selected>🟡 Medium — Someday</option>
+                <option value="low">🟢 Low — If I see it</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Why I want it</label
+            ><input
+              id="wNote"
+              type="text"
+              placeholder="Reason, recommendation source, etc..."
+            />
+          </div>
+          <button class="btn-wish-add" onclick="addWish()">
+            🛒 Add to Buy List
+          </button>
+        </div>
+
+        <div id="wishlistContainer"></div>
+      </main>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <div class="modal-overlay" id="deleteModal">
+      <div class="modal">
+        <h2>Remove this book?</h2>
+        <p style="color: var(--muted); font-size: 0.875rem">
+          This will permanently remove the book from your collection.
+        </p>
+        <div class="modal-actions">
+          <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+          <button class="btn-confirm" onclick="confirmDelete()">Remove</button>
+        </div>
+      </div>
+    </div>
+
+  </body>
+</html>
